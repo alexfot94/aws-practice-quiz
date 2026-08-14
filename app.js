@@ -8,7 +8,7 @@
     examBadge: $('examBadge'), multiBadge: $('multiBadge'), modeBadge: $('modeBadge'), qText: $('questionText'), options: $('options'), feedback: $('feedback'),
     prev: $('prevBtn'), check: $('checkBtn'), next: $('nextBtn'), exit: $('exitBtn'), reviewWrong: $('reviewWrongBtn'), reset: $('resetBtn'),
     resultTitle: $('resultTitle'), resultScore: $('resultScore'), resultDetail: $('resultDetail'), reviewResults: $('reviewResultsBtn'), newQuiz: $('newQuizBtn'),
-    theme: $('themeBtn')
+    theme: $('themeBtn'), reviewCard: $('reviewCard'), reviewList: $('reviewList'), reviewSummary: $('reviewSummary'), continueTest: $('continueTestBtn')
   };
 
   let state = { quiz: [], pos: 0, answers: {}, checked: {}, mode: 'quiz', config: null, deadline: null, reviewReturn: null };
@@ -111,6 +111,7 @@
   function showQuiz(){
     els.setup.classList.add('hidden');
     els.results.classList.add('hidden');
+    els.reviewCard.classList.add('hidden');
     els.quiz.classList.remove('hidden');
   }
 
@@ -118,6 +119,7 @@
     stopTimer();
     els.quiz.classList.add('hidden');
     els.results.classList.add('hidden');
+    els.reviewCard.classList.add('hidden');
     els.setup.classList.remove('hidden');
     updateResume();
   }
@@ -128,9 +130,8 @@
     if (!q) return showSetup();
 
     const simulation = isSimulationActive();
-    const review = state.mode === 'review';
     const checked = !!state.checked[q.id];
-    const locked = review || (!simulation && checked);
+    const locked = !simulation && checked;
     const selected = selectedFor(q.id);
     const cCount = simulation ? simulationCorrectCount() : correctCount();
     const aCount = simulation ? answeredCount() : checkedCount();
@@ -210,12 +211,10 @@
     }
 
     els.prev.disabled = state.pos === 0;
-    els.check.classList.toggle('hidden', simulation || review || checked);
-    els.next.classList.toggle('hidden', review ? false : (!simulation && !checked));
+    els.check.classList.toggle('hidden', simulation || checked);
+    els.next.classList.toggle('hidden', !simulation && !checked);
 
-    if (review) {
-      els.next.textContent = state.pos === state.quiz.length - 1 ? 'End review' : 'Next →';
-    } else if (simulation) {
+    if (simulation) {
       els.next.textContent = state.pos === state.quiz.length - 1 ? 'Finish test' : 'Next →';
     } else {
       els.next.textContent = state.pos === state.quiz.length - 1 ? 'Finish quiz' : 'Next →';
@@ -248,7 +247,6 @@
 
   function next() {
     if (state.pos >= state.quiz.length - 1) {
-      if (state.mode === 'review') return endReview();
       return finish(false);
     }
     state.pos++;
@@ -284,6 +282,7 @@
 
     els.quiz.classList.add('hidden');
     els.setup.classList.add('hidden');
+    els.reviewCard.classList.add('hidden');
     els.results.classList.remove('hidden');
     els.resultScore.textContent = `${pct}%`;
     els.resultTitle.textContent = timedOut ? "Time's up — test submitted" : (pct >= 70 ? 'Nice work!' : 'Keep practicing');
@@ -296,38 +295,86 @@
     els.reviewResults.disabled = !state.quiz.some(id=>state.checked[id] && !isCorrect(qById(id)));
   }
 
+  function answerText(q, letters) {
+    if (!letters?.length) return 'No answer selected.';
+    return letters.map(letter => {
+      const opt = q.options.find(o => o.id === letter);
+      return `${letter}. ${opt?.text || ''}`;
+    }).join(' | ');
+  }
+
   function reviewIncorrect() {
-    stopTimer();
+    if (isSimulationActive()) return;
     const wrong = state.quiz.filter(id => state.checked[id] && !isCorrect(qById(id)));
     if (!wrong.length) return;
 
+    stopTimer();
     state.reviewReturn = {
-      quiz: [...state.quiz],
-      pos: state.pos,
-      mode: state.mode,
-      deadline: state.deadline
+      view: state.mode === 'complete' ? 'results' : 'quiz',
+      pos: state.pos
     };
-    state.quiz = wrong;
-    state.pos = 0;
-    state.mode = 'review';
-    state.deadline = null;
     save();
-    showQuiz();
-    render();
+
+    els.quiz.classList.add('hidden');
+    els.setup.classList.add('hidden');
+    els.results.classList.add('hidden');
+    els.reviewCard.classList.remove('hidden');
+    els.reviewList.innerHTML = '';
+    els.reviewSummary.textContent = `${wrong.length} incorrect question${wrong.length === 1 ? '' : 's'} answered so far.`;
+    els.continueTest.textContent = state.mode === 'complete' ? 'Back to results' : 'Continue test';
+
+    wrong.forEach((id, index) => {
+      const q = qById(id);
+      const item = document.createElement('article');
+      item.className = 'card review-item';
+
+      const meta = document.createElement('div');
+      meta.className = 'question-meta';
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = `Practice Exam ${q.exam} · Q${q.number}`;
+      meta.appendChild(badge);
+
+      const title = document.createElement('h3');
+      title.textContent = `${index + 1}. ${q.question}`;
+
+      const grid = document.createElement('div');
+      grid.className = 'review-answer-grid';
+
+      const userBox = document.createElement('div');
+      userBox.className = 'review-answer user-answer';
+      const userLabel = document.createElement('span');
+      userLabel.className = 'review-answer-label';
+      userLabel.textContent = 'Your answer';
+      const userText = document.createElement('p');
+      userText.textContent = answerText(q, selectedFor(id));
+      userBox.append(userLabel, userText);
+
+      const correctBox = document.createElement('div');
+      correctBox.className = 'review-answer correct-answer';
+      const correctLabel = document.createElement('span');
+      correctLabel.className = 'review-answer-label';
+      correctLabel.textContent = 'Correct answer';
+      const correctText = document.createElement('p');
+      correctText.textContent = answerText(q, q.correct);
+      correctBox.append(correctLabel, correctText);
+
+      grid.append(userBox, correctBox);
+      item.append(meta, title, grid);
+      els.reviewList.appendChild(item);
+    });
+
+    window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  function endReview() {
-    const back = state.reviewReturn;
-    if (!back?.quiz?.length) return showSetup();
-
-    state.quiz = [...back.quiz];
-    state.pos = Math.min(back.pos || 0, state.quiz.length - 1);
-    state.mode = back.mode || 'quiz';
-    state.deadline = back.deadline || null;
+  function continueAfterReview() {
+    const back = state.reviewReturn || { view: state.mode === 'complete' ? 'results' : 'quiz', pos: state.pos };
+    if (typeof back.pos === 'number') state.pos = Math.min(Math.max(back.pos, 0), Math.max(state.quiz.length - 1, 0));
     state.reviewReturn = null;
     save();
+    els.reviewCard.classList.add('hidden');
 
-    if (state.mode === 'complete') {
+    if (back.view === 'results' || state.mode === 'complete') {
       els.quiz.classList.add('hidden');
       els.setup.classList.add('hidden');
       els.results.classList.remove('hidden');
@@ -336,7 +383,6 @@
 
     showQuiz();
     render();
-    startTimerIfNeeded();
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
@@ -390,6 +436,7 @@
   els.exit.addEventListener('click', showSetup);
   els.reviewWrong.addEventListener('click', reviewIncorrect);
   els.reviewResults.addEventListener('click', reviewIncorrect);
+  els.continueTest.addEventListener('click', continueAfterReview);
   els.newQuiz.addEventListener('click', showSetup);
   els.reset.addEventListener('click', resetQuiz);
   els.theme.addEventListener('click', () => {
