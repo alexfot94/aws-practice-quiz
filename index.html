@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AWS Cloud Practitioner Practice Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CLF-C02 STUDY TOOL</p>
+        <h1>AWS Practice Quiz</h1>
+        <p class="subhead">1,142 questions from 23 practice exams.</p>
+      </div>
+      <button id="themeBtn" class="icon-btn" type="button" aria-label="Toggle theme">◐</button>
+    </header>
+
+    <section id="setupCard" class="card setup-card">
+      <h2>Start a quiz</h2>
+      <div class="setup-grid">
+        <label>
+          Question set
+          <select id="examSelect"></select>
+        </label>
+        <label>
+          Order
+          <select id="orderSelect">
+            <option value="normal">Original order</option>
+            <option value="shuffle">Shuffle questions</option>
+          </select>
+        </label>
+        <label>
+          Quiz length
+          <select id="lengthSelect">
+            <option value="all">All questions in selection</option>
+            <option value="10">10 questions</option>
+            <option value="25">25 questions</option>
+            <option value="50">50 questions</option>
+            <option value="65">65 questions (exam-style)</option>
+          </select>
+        </label>
+        <label>
+          Mode
+          <select id="modeSelect">
+            <option value="practice">Practice — instant feedback</option>
+            <option value="simulation-100">Test simulation — 100 minutes</option>
+            <option value="simulation-130">Test simulation — 130 minutes</option>
+          </select>
+        </label>
+      </div>
+      <div class="setup-actions">
+        <button id="startBtn" class="primary" type="button">Start quiz</button>
+        <button id="resumeBtn" class="secondary hidden" type="button">Resume saved quiz</button>
+      </div>
+    </section>
+
+    <section id="quizArea" class="hidden">
+      <div class="stats card compact">
+        <div><span class="stat-label">Question</span><strong id="progressText">1 / 1</strong></div>
+        <div><span class="stat-label">Score</span><strong id="scoreText">0 / 0</strong></div>
+        <div><span class="stat-label">Accuracy</span><strong id="accuracyText">—</strong></div>
+        <div id="timerStat" class="timer-stat hidden"><span class="stat-label">Time left</span><strong id="timerText">01:40:00</strong></div>
+        <button id="exitBtn" class="text-btn" type="button">Change quiz</button>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div id="progressBar"></div></div>
+
+      <article class="card question-card">
+        <div class="question-meta">
+          <span id="examBadge" class="badge"></span>
+          <span id="multiBadge" class="badge subtle hidden">Choose two</span>
+          <span id="modeBadge" class="badge subtle hidden"></span>
+        </div>
+        <h2 id="questionText"></h2>
+        <div id="options" class="options"></div>
+        <div id="feedback" class="feedback hidden" role="status"></div>
+        <div class="question-actions">
+          <button id="prevBtn" class="secondary" type="button">← Previous</button>
+          <button id="checkBtn" class="primary" type="button">Check answer</button>
+          <button id="nextBtn" class="primary hidden" type="button">Next →</button>
+        </div>
+      </article>
+
+      <div class="jump-card card compact">
+        <button id="reviewWrongBtn" class="secondary" type="button">Review incorrect</button>
+        <button id="resetBtn" class="danger-text" type="button">Reset this quiz</button>
+      </div>
+    </section>
+
+    <section id="resultsCard" class="card results hidden">
+      <p class="eyebrow">QUIZ COMPLETE</p>
+      <h2 id="resultTitle">Your result</h2>
+      <div class="result-score" id="resultScore"></div>
+      <p id="resultDetail"></p>
+      <div class="setup-actions">
+        <button id="reviewResultsBtn" class="primary" type="button">Review incorrect answers</button>
+        <button id="newQuizBtn" class="secondary" type="button">New quiz</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>Questions sourced from the provided AWS-Certified-Cloud-Practitioner-Notes repository. Quiz progress is saved locally on this device.</p>
+    </footer>
+  </main>
+
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
