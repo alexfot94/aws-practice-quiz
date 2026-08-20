@@ -25,8 +25,11 @@
     "22": 50,
     "23": 50
   },
-  "multi_answer": 159,
-  "single_answer": 983,
+  "multi_answer": 267,
+  "single_answer": 875,
   "missing_questions": 0,
-  "missing_options": 0
+  "missing_options": 0,
+  "choose_two": 264,
+  "choose_three": 3,
+  "source_answer_keys_reparsed": true
 }

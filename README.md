@@ -5,7 +5,7 @@ A local quiz app generated from the `practice-exam` folder in the provided `AWS-
 ## Features
 
 - 1,142 questions across 23 practice exams
-- Single-answer and multiple-answer questions
+- Single-answer and multiple-answer questions (264 Choose Two and 3 Choose Three)
 - “Choose two” / “Choose three” validation: the full required answer set must match to receive credit
 - Immediate correct/incorrect feedback in Practice mode
 - Correct answer shown after checking in Practice mode
@@ -15,6 +15,9 @@ A local quiz app generated from the `practice-exam` folder in the provided `AWS-
 - Original or shuffled question order
 - Review-incorrect mode
 - Local progress saving
+- Click the AWS Practice Quiz header to return Home without losing the active quiz; use Resume quiz to continue
+- Reset this quiz discards the active session and returns to quiz selection
+- Mobile-friendly review navigation with Continue test available at the bottom of the review list
 - Light/dark theme toggle
 
 ## Run locally

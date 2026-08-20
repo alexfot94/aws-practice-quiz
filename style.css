@@ -30,6 +30,10 @@ button{cursor:pointer}
 .app-shell{width:min(920px,calc(100% - 28px));margin:0 auto;padding:34px 0 56px}
 .topbar{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}
 h1{font-size:clamp(2rem,5vw,3rem);line-height:1.05;margin:2px 0 8px;color:var(--blue)}
+.brand-home{display:block;color:inherit;text-decoration:none;border-radius:12px;padding:2px 4px;margin:-2px -4px;touch-action:manipulation}
+.brand-home:hover h1{color:var(--brand-dark)}
+.brand-home:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.brand-home .subhead{margin-bottom:0}
 h2{line-height:1.25;margin-top:0}
 .eyebrow{margin:0;color:var(--brand-dark);font-weight:800;letter-spacing:.12em;font-size:.78rem}
 .subhead,footer{color:var(--muted)}
@@ -62,7 +66,8 @@ button{border-radius:10px;padding:10px 16px;border:1px solid transparent;font-we
 .options{display:grid;gap:11px}
 .option{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;transition:.15s ease;background:transparent}
 .option:hover{border-color:#9aa9ba}
-.option input{margin-top:4px;transform:scale(1.12)}
+.option input{margin-top:4px;transform:scale(1.12);flex:0 0 auto}
+.option{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .option-letter{font-weight:850;min-width:1.3em}
 .option.correct{border-color:var(--good);background:var(--good-bg)}
 .option.wrong{border-color:var(--bad);background:var(--bad-bg)}
@@ -97,4 +102,12 @@ footer{font-size:.82rem;text-align:center;margin-top:26px}
 .review-answer p{margin:0;font-weight:650}
 @media (max-width:700px){
  .review-header{align-items:stretch;flex-direction:column}.review-header button{width:100%}.review-answer-grid{grid-template-columns:1fr}
+}
+
+.review-continue-bottom{display:none;margin-top:14px}
+@media (max-width:700px){
+ .review-continue-bottom{display:block;width:100%;position:sticky;bottom:10px;z-index:5;box-shadow:0 8px 24px rgba(15,23,42,.16)}
+ .brand-home{max-width:calc(100% - 56px)}
+ .option{min-height:52px}
+ .option input{width:20px;height:20px;transform:none}
 }

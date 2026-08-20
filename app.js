@@ -8,7 +8,7 @@
     examBadge: $('examBadge'), multiBadge: $('multiBadge'), modeBadge: $('modeBadge'), qText: $('questionText'), options: $('options'), feedback: $('feedback'),
     prev: $('prevBtn'), check: $('checkBtn'), next: $('nextBtn'), exit: $('exitBtn'), reviewWrong: $('reviewWrongBtn'), reset: $('resetBtn'),
     resultTitle: $('resultTitle'), resultScore: $('resultScore'), resultDetail: $('resultDetail'), reviewResults: $('reviewResultsBtn'), newQuiz: $('newQuizBtn'),
-    theme: $('themeBtn'), reviewCard: $('reviewCard'), reviewList: $('reviewList'), reviewSummary: $('reviewSummary'), continueTest: $('continueTestBtn')
+    theme: $('themeBtn'), homeLogo: $('homeLogoBtn'), reviewCard: $('reviewCard'), reviewList: $('reviewList'), reviewSummary: $('reviewSummary'), continueTest: $('continueTestBtn'), continueTestBottom: $('continueTestBottomBtn')
   };
 
   let state = { quiz: [], pos: 0, answers: {}, checked: {}, mode: 'quiz', config: null, deadline: null, reviewReturn: null };
@@ -158,7 +158,7 @@
       label.className = 'option' + (locked ? ' locked' : '');
       const input = document.createElement('input');
       input.type = required > 1 ? 'checkbox' : 'radio';
-      input.name = 'answer';
+      input.name = required > 1 ? `answer-${q.id}-${o.id}` : `answer-${q.id}`;
       input.value = o.id;
       input.checked = selected.includes(o.id);
       input.disabled = locked;
@@ -321,7 +321,9 @@
     els.reviewCard.classList.remove('hidden');
     els.reviewList.innerHTML = '';
     els.reviewSummary.textContent = `${wrong.length} incorrect question${wrong.length === 1 ? '' : 's'} answered so far.`;
-    els.continueTest.textContent = state.mode === 'complete' ? 'Back to results' : 'Continue test';
+    const continueLabel = state.mode === 'complete' ? 'Back to results' : 'Continue test';
+    els.continueTest.textContent = continueLabel;
+    els.continueTestBottom.textContent = continueLabel;
 
     wrong.forEach((id, index) => {
       const q = qById(id);
@@ -387,16 +389,20 @@
   }
 
   function resetQuiz() {
-    if (!confirm('Reset all answers and score for this quiz?')) return;
-    const simulation = isSimulationConfig();
-    state.answers = {};
-    state.checked = {};
-    state.pos = 0;
-    state.mode='quiz';
-    state.deadline = simulation ? Date.now() + simulationMinutes() * 60 * 1000 : null;
-    save();
-    render();
-    startTimerIfNeeded();
+    if (!confirm('Reset this quiz and return to quiz selection?')) return;
+    stopTimer();
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(LEGACY_SAVE_KEY);
+    state = { quiz: [], pos: 0, answers: {}, checked: {}, mode: 'quiz', config: null, deadline: null, reviewReturn: null };
+    showSetup();
+  }
+
+  function goHome(event) {
+    if (event) event.preventDefault();
+    // Deliberately preserve the active quiz. The setup screen will offer Resume Quiz.
+    if (state.quiz.length && state.mode !== 'complete') save();
+    showSetup();
+    window.scrollTo({top:0, behavior:'smooth'});
   }
 
   function formatTime(ms) {
@@ -437,8 +443,10 @@
   els.reviewWrong.addEventListener('click', reviewIncorrect);
   els.reviewResults.addEventListener('click', reviewIncorrect);
   els.continueTest.addEventListener('click', continueAfterReview);
+  els.continueTestBottom.addEventListener('click', continueAfterReview);
   els.newQuiz.addEventListener('click', showSetup);
   els.reset.addEventListener('click', resetQuiz);
+  els.homeLogo.addEventListener('click', goHome);
   els.theme.addEventListener('click', () => {
     const root = document.documentElement;
     const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
